@@ -24,9 +24,11 @@ docker compose up -d --wait
 npm start
 ```
 
-Startup initializes the SQLite schema and leaves a fresh database empty. To try a demo link, run `npm run seed` in another terminal, then `curl -si http://127.0.0.1:3100/r/launch`. The seed command preserves any existing `launch` link. Edit `DATABASE_PATH`, `PORT`, and `VALKEY_URL` in `.env` as needed. Both `npm start` and `npm run seed` load that file.
+Startup initializes the SQLite schema and leaves a fresh database empty. To try a demo link, run `npm run seed` in another terminal, then `curl -si http://127.0.0.1:3100/r/launch`. The seed command preserves any existing `launch` link. Edit `DATABASE_PATH`, `PORT`, `HOST`, and `VALKEY_URL` in `.env` as needed. Both `npm start` and `npm run seed` load that file.
 
 Stop the service and run `docker compose down` when finished.
+
+When running the app inside a container, set `HOST=0.0.0.0`. Point `VALKEY_URL` at the Valkey service, for example `redis://valkey:6379` on the same Docker network. To keep the published port local to the Docker host, use `-p 127.0.0.1:3100:3100`.
 
 ## Tests
 
