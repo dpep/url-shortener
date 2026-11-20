@@ -61,10 +61,13 @@ export function createApp(links: ReturnType<typeof createLinks>) {
 interface AppOptions {
   databasePath: string;
   port?: number;
+  host?: string;
   cachePrefix?: string;
 }
 
-export async function startApp({ databasePath, port = 0, cachePrefix = '' }: AppOptions) {
+export async function startApp({
+  databasePath, port = 0, host = '127.0.0.1', cachePrefix = '',
+}: AppOptions) {
   const repository = openLinkRepository(databasePath);
   let cache: Awaited<ReturnType<typeof connectCache>> | undefined;
   try {
@@ -74,7 +77,7 @@ export async function startApp({ databasePath, port = 0, cachePrefix = '' }: App
 
     await new Promise<void>((resolve, reject) => {
       server.once('error', reject);
-      server.listen(port, '127.0.0.1', () => {
+      server.listen(port, host, () => {
         server.off('error', reject);
         resolve();
       });
@@ -82,8 +85,12 @@ export async function startApp({ databasePath, port = 0, cachePrefix = '' }: App
 
     const address = server.address();
     if (!address || typeof address === 'string') throw new Error('Expected a TCP listener');
+    let reachableHost = address.address;
+    if (reachableHost === '0.0.0.0') reachableHost = '127.0.0.1';
+    if (reachableHost === '::') reachableHost = '::1';
+    const originHost = address.family === 'IPv6' ? `[${reachableHost}]` : reachableHost;
     return {
-      origin: `http://127.0.0.1:${address.port}`,
+      origin: `http://${originHost}:${address.port}`,
       disconnectCache: connectedCache.close,
       async close() {
         try {
