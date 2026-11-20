@@ -1,6 +1,6 @@
 import { createLinks } from '../src/application/links.ts';
 
-export const originalDestination = 'https://old.example/launch';
+export const originalDestination = 'https://old.example/docs';
 
 export function stubCache(available = true) {
   const cached = new Map<string, string>();
@@ -18,7 +18,7 @@ export function stubCache(available = true) {
 }
 
 export function fixture({ cacheAvailable = true } = {}) {
-  const records = new Map([['launch', originalDestination]]);
+  const records = new Map([['docs', originalDestination]]);
   const repository = { get: (slug: string) => records.get(slug) ?? null };
   const { cached, cache } = stubCache(cacheAvailable);
   return { links: createLinks({ repository, cache }), records, cached };

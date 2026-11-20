@@ -24,7 +24,7 @@ docker compose up -d --wait
 npm start
 ```
 
-Startup initializes the SQLite schema and leaves a fresh database empty. To try a demo link, run `npm run seed` in another terminal, then `curl -si http://127.0.0.1:3100/r/launch`. The seed command preserves any existing `launch` link. Edit `DATABASE_PATH`, `PORT`, `HOST`, and `VALKEY_URL` in `.env` as needed. Both `npm start` and `npm run seed` load that file.
+Startup creates the SQLite schema. Populate the `links` table with your own `slug` and `destination` values, then request `/r/:slug`. Edit `DATABASE_PATH`, `PORT`, `HOST`, and `VALKEY_URL` in `.env` as needed.
 
 Stop the service and run `docker compose down` when finished.
 
