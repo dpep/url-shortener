@@ -36,3 +36,7 @@ npm test
 ```
 
 [GitHub Actions](https://github.com/dudo/url-shortener/actions) runs the type check and application tests. The tests use in-memory doubles for the repository and cache, and can run without a local `.env`.
+
+### SQLite integration
+
+Run `npm run test:integration` to exercise the real SQLite adapter. Each test uses a temporary database file and the in-memory cache double. The suite also runs as its own GitHub Actions job.
