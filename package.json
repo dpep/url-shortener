@@ -7,10 +7,7 @@
   },
   "scripts": {
     "start": "node src/local.mjs",
-    "test": "node --test test/baseline.test.mjs test/proposal.test.mjs",
-    "test:baseline": "node --test test/baseline.test.mjs",
-    "test:proposal": "node --test test/proposal.test.mjs",
-    "test:exercise": "node --test test/mixed-versions.test.mjs"
+    "test": "node --test test/redirect.test.mjs"
   },
   "dependencies": {
     "@redis/client": "6.3.1"
