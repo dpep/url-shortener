@@ -25,10 +25,10 @@ export async function connectCache(prefix = '') {
     });
   }
 
-  async function bestEffort(command) {
-    let timer;
+  async function bestEffort<T>(command: () => Promise<T>): Promise<T | null> {
+    let timer: ReturnType<typeof setTimeout> | undefined;
     try {
-      const deadline = new Promise(resolve => {
+      const deadline = new Promise<null>(resolve => {
         timer = setTimeout(resolve, cacheTimeoutMs, null);
       });
       // A command can still execute on the server after the caller stops waiting.
@@ -41,10 +41,12 @@ export async function connectCache(prefix = '') {
   }
 
   return {
-    get: key => bestEffort(() => client.get(prefix + key)),
-    set: (key, value) => bestEffort(() => client.set(prefix + key, value, {
-      expiration: { type: 'EX', value: 60 },
-    })),
+    get: (key: string) => bestEffort(() => client.get(prefix + key)),
+    async set(key: string, value: string) {
+      await bestEffort(() => client.set(prefix + key, value, {
+        expiration: { type: 'EX', value: 60 },
+      }));
+    },
     close: () => {
       if (client.isOpen) client.destroy();
     },

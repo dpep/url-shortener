@@ -1,13 +1,14 @@
-import { createServer } from 'node:http';
+import { createServer, type OutgoingHttpHeaders, type ServerResponse } from 'node:http';
+import type { createLinks } from '../application/links.ts';
 
-function reply(response, status, headers = {}) {
+function reply(response: ServerResponse, status: number, headers: OutgoingHttpHeaders = {}) {
   response.writeHead(status, headers).end();
 }
 
-export function redirectServer(links) {
+export function redirectServer(links: ReturnType<typeof createLinks>) {
   return createServer(async (request, response) => {
     try {
-      const path = new URL(request.url, 'http://localhost').pathname;
+      const path = new URL(request.url ?? '/', 'http://localhost').pathname;
       const match = /^\/r\/([a-z0-9-]{1,64})$/.exec(path);
       if (!match) return reply(response, 404);
       if (request.method !== 'GET') return reply(response, 405, { Allow: 'GET' });

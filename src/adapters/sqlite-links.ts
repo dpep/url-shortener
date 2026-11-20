@@ -1,6 +1,9 @@
+import { mkdirSync } from 'node:fs';
+import { dirname } from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 
-export function openLinkRepository(filename) {
+export function openLinkRepository(filename: string) {
+  mkdirSync(dirname(filename), { recursive: true });
   const db = new DatabaseSync(filename);
   try {
     db.exec(`
@@ -16,8 +19,11 @@ export function openLinkRepository(filename) {
     `);
 
     return {
-      get: slug => select.get(slug)?.destination ?? null,
-      seed: (slug, destination) => insert.run(slug, destination),
+      get(slug: string) {
+        const destination = select.get(slug)?.destination;
+        return typeof destination === 'string' ? destination : null;
+      },
+      insert: (slug: string, destination: string) => insert.run(slug, destination).changes === 1,
       close: () => db.close(),
     };
   } catch (error) {
