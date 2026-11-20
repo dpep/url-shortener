@@ -1,4 +1,5 @@
-import { fileURLToPath } from 'node:url';
-
-export const databasePath = process.env.DATABASE_PATH ??
-  fileURLToPath(new URL('../.local/links.sqlite', import.meta.url));
+export function getDatabasePath(): string {
+  const path = process.env.DATABASE_PATH;
+  if (!path?.trim()) throw new Error('Set DATABASE_PATH in .env.');
+  return path;
+}

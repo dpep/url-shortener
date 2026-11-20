@@ -1,7 +1,7 @@
 import { openLinkRepository } from '../src/adapters/sqlite-links.ts';
-import { databasePath } from '../src/config.ts';
+import { getDatabasePath } from '../src/config.ts';
 
-const repository = openLinkRepository(databasePath);
+const repository = openLinkRepository(getDatabasePath());
 try {
   if (repository.insert('launch', 'https://old.example/launch')) {
     console.log('Added the demo link at /r/launch.');

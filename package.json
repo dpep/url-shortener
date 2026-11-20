@@ -6,8 +6,8 @@
     "node": ">=24.12.0"
   },
   "scripts": {
-    "start": "node src/index.ts",
-    "seed": "node scripts/seed.ts",
+    "start": "node --env-file=.env src/index.ts",
+    "seed": "node --env-file=.env scripts/seed.ts",
     "typecheck": "tsc --noEmit",
     "test": "node --test test/redirect.test.ts"
   },

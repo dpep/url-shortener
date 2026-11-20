@@ -15,18 +15,24 @@ A small TypeScript HTTP service that resolves short links. `GET /r/:slug` return
 
 ## Run locally
 
-Use Node.js 24.12 or later with npm and Docker Compose.
+Use Node.js 24.12 or later with npm. Docker Compose runs Valkey for the local app.
 
 ```sh
 npm ci
+cp .env.example .env
 docker compose up -d --wait
-npm run typecheck
-npm test
 npm start
 ```
 
-Startup initializes the SQLite schema and leaves a fresh database empty. To try a demo link, run `npm run seed` in another terminal, then `curl -si http://127.0.0.1:3100/r/launch`. The seed command preserves any existing `launch` link. Set `DATABASE_PATH` or `PORT` to override `.local/links.sqlite` and port 3100.
+Startup initializes the SQLite schema and leaves a fresh database empty. To try a demo link, run `npm run seed` in another terminal, then `curl -si http://127.0.0.1:3100/r/launch`. The seed command preserves any existing `launch` link. Edit `DATABASE_PATH`, `PORT`, and `VALKEY_URL` in `.env` as needed. Both `npm start` and `npm run seed` load that file.
 
-The app and tests connect to `redis://127.0.0.1:6380` by default. Set `VALKEY_URL` to use a different local instance. Stop the service and run `docker compose down` when finished.
+Stop the service and run `docker compose down` when finished.
 
-[GitHub Actions](https://github.com/dudo/url-shortener/actions) runs the service integration tests with SQLite and Valkey.
+## Tests
+
+```sh
+npm run typecheck
+npm test
+```
+
+[GitHub Actions](https://github.com/dudo/url-shortener/actions) runs the type check and application tests. The tests use in-memory doubles for the repository and cache, and can run without a local `.env`.
