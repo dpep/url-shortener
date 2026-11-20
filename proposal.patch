@@ -1,0 +1,20 @@
+--- versions/baseline.mjs
++++ versions/proposal.mjs
+@@ -1,4 +1,4 @@
+-const cacheKey = slug => `redirect:${slug}`;
++const cacheKey = slug => `redirect:v2:${slug}`;
+ 
+ export function createLinks({ store, cache }) {
+   return {
+@@ -11,5 +11,11 @@
+       if (destination !== null) await cache.set(key, destination);
+       return destination;
+     },
++
++    async retarget(slug, destination) {
++      const updated = store.update(slug, destination);
++      if (updated) await cache.delete(cacheKey(slug));
++      return updated;
++    },
+   };
+ }

@@ -1,0 +1,18 @@
+{
+  "name": "short-link-review",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "start": "node src/local.mjs",
+    "test": "node --test test/baseline.test.mjs test/proposal.test.mjs",
+    "test:baseline": "node --test test/baseline.test.mjs",
+    "test:proposal": "node --test test/proposal.test.mjs",
+    "test:exercise": "node --test test/mixed-versions.test.mjs"
+  },
+  "dependencies": {
+    "@redis/client": "6.3.1"
+  }
+}
