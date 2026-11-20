@@ -1,6 +1,6 @@
 # URL shortener
 
-A small HTTP service that resolves seeded short links. `GET /r/:slug` returns a `302` with a `Location` and `Cache-Control: no-store`. Unknown slugs return `404`.
+A small HTTP service that resolves seeded short links. `GET /r/:slug` returns a `302` with a `Location` and `Cache-Control: no-store`. Unknown slugs return `404`. `PATCH /r/:slug` updates an existing destination from a JSON body such as `{"destination":"https://new.example/launch"}` and returns `204`.
 
 ## Layers
 

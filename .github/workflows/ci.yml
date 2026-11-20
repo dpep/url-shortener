@@ -11,7 +11,15 @@ permissions:
 
 jobs:
   test:
-    name: Service tests
+    name: ${{ matrix.suite == 'mixed' && 'Mixed-version redirects' || 'Service tests' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [service, mixed]
+        event: ["${{ github.event_name }}"]
+        exclude:
+          - suite: mixed
+            event: push
     runs-on: ubuntu-latest
     timeout-minutes: 5
     services:
@@ -36,3 +44,17 @@ jobs:
           package-manager-cache: false
       - run: npm ci
       - run: npm test
+        if: matrix.suite == 'service'
+      - name: Check out the PR base
+        if: matrix.suite == 'mixed'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: .baseline
+          persist-credentials: false
+      - run: npm ci --prefix .baseline
+        if: matrix.suite == 'mixed'
+      - run: npm run test:mixed
+        if: matrix.suite == 'mixed'
+        env:
+          BASELINE_DIR: .baseline

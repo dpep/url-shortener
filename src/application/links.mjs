@@ -1,4 +1,4 @@
-const cacheKey = slug => `redirect:${slug}`;
+const cacheKey = slug => `redirect:v2:${slug}`;
 
 export function createLinks({ repository, cache }) {
   return {
@@ -10,6 +10,12 @@ export function createLinks({ repository, cache }) {
       const destination = repository.get(slug);
       if (destination !== null) await cache.set(key, destination);
       return destination;
+    },
+
+    async retarget(slug, destination) {
+      if (!repository.update(slug, destination)) return false;
+      await cache.delete(cacheKey(slug));
+      return true;
     },
   };
 }

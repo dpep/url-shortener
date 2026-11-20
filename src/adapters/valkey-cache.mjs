@@ -45,6 +45,7 @@ export async function connectCache(prefix = '') {
     set: (key, value) => bestEffort(() => client.set(prefix + key, value, {
       expiration: { type: 'EX', value: 60 },
     })),
+    delete: key => bestEffort(() => client.del(prefix + key)),
     close: () => {
       if (client.isOpen) client.destroy();
     },
