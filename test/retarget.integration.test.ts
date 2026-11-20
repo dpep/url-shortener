@@ -25,3 +25,24 @@ test('an edit commits to SQLite with a closed Valkey connection', async t => {
   assert.equal(database.get('launch'), newDestination);
   assert.equal(await redirect(origin), newDestination);
 });
+
+test('the edit route supports CORS preflight and rejects invalid JSON bodies', async t => {
+  const { origin, database } = await fixture(t);
+  const url = `${origin}/r/launch`;
+  const options = await fetch(url, {
+    method: 'OPTIONS',
+    headers: { Origin: 'https://ui.example', 'Access-Control-Request-Method': 'PATCH' },
+  });
+  assert.equal(options.status, 204);
+  assert.ok(options.headers.get('access-control-allow-methods')?.split(',').map(method => method.trim()).includes('PATCH'));
+
+  const send = (body: string) => fetch(url, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body,
+  });
+  assert.equal((await send('{"destination":')).status, 400);
+  const oversize = JSON.stringify({ destination: 'https://new.example/' + 'a'.repeat(4096) });
+  assert.equal((await send(oversize)).status, 413);
+  assert.equal(database.get('launch'), originalDestination);
+});
