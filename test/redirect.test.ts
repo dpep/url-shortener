@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { fixture, originalDestination, redirect } from './support.mjs';
+import { fixture, originalDestination, redirect } from './support.ts';
 
 test('redirect reads the seeded SQLite row and fills Valkey', async t => {
   const { origin, cache } = await fixture(t);
@@ -8,6 +8,12 @@ test('redirect reads the seeded SQLite row and fills Valkey', async t => {
   assert.equal(await redirect(origin), originalDestination);
   assert.equal(await cache.get('redirect:v2:launch'), originalDestination);
   assert.equal(await redirect(origin), originalDestination);
+});
+
+test('startup leaves a fresh database without demo links', async t => {
+  const { origin, database } = await fixture(t, { seed: false });
+  assert.equal(database.get('launch'), null);
+  assert.equal((await fetch(`${origin}/r/launch`, { redirect: 'manual' })).status, 404);
 });
 
 test('redirect returns 404 for unknown slugs and 405 for unsupported methods', async t => {

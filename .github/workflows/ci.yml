@@ -43,6 +43,7 @@ jobs:
           node-version: 24
           package-manager-cache: false
       - run: npm ci
+      - run: npm run typecheck
       - run: npm test
         if: matrix.suite == 'service'
       - name: Check out the PR base
@@ -52,7 +53,7 @@ jobs:
           ref: ${{ github.event.pull_request.base.sha }}
           path: .baseline
           persist-credentials: false
-      - run: npm ci --prefix .baseline
+      - run: npm ci --omit=dev --prefix .baseline
         if: matrix.suite == 'mixed'
       - run: npm run test:mixed
         if: matrix.suite == 'mixed'

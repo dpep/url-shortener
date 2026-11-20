@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { fixture, newDestination, originalDestination, patch, redirect } from './support.mjs';
+import { fixture, newDestination, originalDestination, patch, redirect } from './support.ts';
 
 test('an edit commits to SQLite and refreshes a warmed redirect', async t => {
   const { origin, database, cache } = await fixture(t);

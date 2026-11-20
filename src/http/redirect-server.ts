@@ -1,10 +1,11 @@
-import { createServer } from 'node:http';
+import { createServer, type IncomingMessage, type OutgoingHttpHeaders, type ServerResponse } from 'node:http';
+import type { createLinks } from '../application/links.ts';
 
-function reply(response, status, headers = {}) {
+function reply(response: ServerResponse, status: number, headers: OutgoingHttpHeaders = {}) {
   response.writeHead(status, headers).end();
 }
 
-async function readDestination(request) {
+async function readDestination(request: IncomingMessage): Promise<string | null> {
   let body = '';
   request.setEncoding('utf8');
   for await (const chunk of request.iterator({ destroyOnReturn: false })) {
@@ -16,19 +17,21 @@ async function readDestination(request) {
   }
 
   try {
-    const { destination } = JSON.parse(body);
-    if (typeof destination !== 'string') return null;
-    const url = new URL(destination);
+    const data: unknown = JSON.parse(body);
+    if (!data || typeof data !== 'object' || !('destination' in data)) return null;
+    if (typeof data.destination !== 'string') return null;
+
+    const url = new URL(data.destination);
     return ['http:', 'https:'].includes(url.protocol) ? url.href : null;
   } catch {
     return null;
   }
 }
 
-export function redirectServer(links) {
+export function redirectServer(links: ReturnType<typeof createLinks>) {
   return createServer(async (request, response) => {
     try {
-      const path = new URL(request.url, 'http://localhost').pathname;
+      const path = new URL(request.url ?? '/', 'http://localhost').pathname;
       const match = /^\/r\/([a-z0-9-]{1,64})$/.exec(path);
       if (!match) return reply(response, 404);
       const [, slug] = match;

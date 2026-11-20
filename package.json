@@ -3,14 +3,20 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=24"
+    "node": ">=24.12.0"
   },
   "scripts": {
-    "start": "node src/local.mjs",
-    "test": "node --test test/redirect.test.mjs test/retarget.test.mjs",
-    "test:mixed": "node --test test/mixed-versions.test.mjs"
+    "start": "node src/index.ts",
+    "seed": "node scripts/seed.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test test/redirect.test.ts test/retarget.test.ts",
+    "test:mixed": "node --test test/mixed-versions.test.ts"
   },
   "dependencies": {
     "@redis/client": "6.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "typescript": "7.0.2"
   }
 }
