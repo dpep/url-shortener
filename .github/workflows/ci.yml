@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   test:
-    name: ${{ matrix.suite == 'mixed' && 'Mixed-version redirects' || 'Service tests' }}
+    name: ${{ matrix.suite == 'mixed' && 'Mixed-version redirects' || 'Unit tests' }}
     strategy:
       fail-fast: false
       matrix:
@@ -24,7 +24,7 @@ jobs:
     timeout-minutes: 5
     services:
       valkey:
-        image: valkey/valkey:9.1.4
+        image: ${{ matrix.suite == 'mixed' && 'valkey/valkey:9.1.4' || '' }}
         ports:
           - 6380:6379
         options: >-
@@ -54,6 +54,8 @@ jobs:
           path: .baseline
           persist-credentials: false
       - run: npm ci --omit=dev --prefix .baseline
+        if: matrix.suite == 'mixed'
+      - run: npm run test:retarget-integration
         if: matrix.suite == 'mixed'
       - run: npm run test:mixed
         if: matrix.suite == 'mixed'

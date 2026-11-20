@@ -1,31 +1,28 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { fixture, originalDestination, redirect } from './support.ts';
+import { fixture, originalDestination } from './support.ts';
 
-test('redirect reads the seeded SQLite row and fills Valkey', async t => {
-  const { origin, cache } = await fixture(t);
-  assert.equal(await cache.get('redirect:v2:launch'), null);
-  assert.equal(await redirect(origin), originalDestination);
-  assert.equal(await cache.get('redirect:v2:launch'), originalDestination);
-  assert.equal(await redirect(origin), originalDestination);
+test('a cache miss reads the repository and fills the cache', async () => {
+  const { links, cached } = fixture();
+  assert.equal(await links.resolve('launch'), originalDestination);
+  assert.equal(cached.get('redirect:v2:launch'), originalDestination);
 });
 
-test('startup leaves a fresh database without demo links', async t => {
-  const { origin, database } = await fixture(t, { seed: false });
-  assert.equal(database.get('launch'), null);
-  assert.equal((await fetch(`${origin}/r/launch`, { redirect: 'manual' })).status, 404);
+test('a warm cache serves the destination without consulting the repository', async () => {
+  const { links, cached, records } = fixture();
+  cached.set('redirect:v2:launch', originalDestination);
+  records.clear();
+  assert.equal(await links.resolve('launch'), originalDestination);
 });
 
-test('redirect returns 404 for unknown slugs and 405 for unsupported methods', async t => {
-  const { origin } = await fixture(t);
-  assert.equal((await fetch(`${origin}/r/missing`)).status, 404);
-  const response = await fetch(`${origin}/r/launch`, { method: 'POST' });
-  assert.equal(response.status, 405);
-  assert.equal(response.headers.get('allow'), 'GET, PATCH');
+test('an unknown slug returns null without filling the cache', async () => {
+  const { links, cached } = fixture();
+  assert.equal(await links.resolve('missing'), null);
+  assert.equal(cached.size, 0);
 });
 
-test('redirect reads SQLite when its Valkey connection is closed', async t => {
-  const { origin, disconnectCache } = await fixture(t);
-  disconnectCache();
-  assert.equal(await redirect(origin), originalDestination);
+test('a cache outage falls back to the repository', async () => {
+  const { links, cached } = fixture({ cacheAvailable: false });
+  assert.equal(await links.resolve('launch'), originalDestination);
+  assert.equal(cached.size, 0);
 });

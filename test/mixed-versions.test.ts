@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { resolve } from 'node:path';
 import test from 'node:test';
 import { pathToFileURL } from 'node:url';
-import { fixture, newDestination, originalDestination, patch, redirect } from './support.ts';
+import { fixture, newDestination, originalDestination, patch, redirect } from './mixed-support.ts';
 
 const baselineDir = process.env.BASELINE_DIR;
 assert.ok(baselineDir, 'Set BASELINE_DIR to a checkout of the base commit with npm ci run.');
