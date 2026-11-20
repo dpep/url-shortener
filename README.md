@@ -6,7 +6,7 @@ A small TypeScript HTTP service that resolves short links. `GET /r/:slug` return
 
 | Layer | Responsibility |
 | --- | --- |
-| [HTTP](src/http/redirect-server.ts) | Match routes and translate application results into HTTP responses. |
+| [HTTP](src/app.ts) | Match Express routes, apply CORS, and translate application results into HTTP responses. |
 | [Application](src/application/links.ts) | Look up a cached destination, fall back to the source of truth, and fill the cache. |
 | [SQLite repository](src/adapters/sqlite-links.ts) | Own the links table and store the authoritative destination. |
 | [Valkey adapter](src/adapters/valkey-cache.ts) | Store cached destinations for 60 seconds. Cache command failures are handled as misses or skipped fills. |

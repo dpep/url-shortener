@@ -1,7 +1,62 @@
+import { createServer } from 'node:http';
+import cors from 'cors';
+import express, { type ErrorRequestHandler } from 'express';
 import { openLinkRepository } from './adapters/sqlite-links.ts';
 import { connectCache } from './adapters/valkey-cache.ts';
 import { createLinks } from './application/links.ts';
-import { redirectServer } from './http/redirect-server.ts';
+
+const allowedMethods = ['GET'];
+const methodNotAllowed: express.RequestHandler = (_request, response) => {
+  response.set('Allow', allowedMethods.join(', ')).status(405).end();
+};
+
+const handleError: ErrorRequestHandler = (error: unknown, _request, response, next) => {
+  if (response.headersSent) {
+    next(error);
+    return;
+  }
+
+  const status = error && typeof error === 'object' && 'status' in error ? error.status : undefined;
+  if (typeof status === 'number' && status >= 400 && status < 500) {
+    response.status(status).end();
+    return;
+  }
+
+  console.error(error);
+  response.status(500).end();
+};
+
+export function createApp(links: ReturnType<typeof createLinks>) {
+  const app = express();
+  app.disable('x-powered-by');
+  app.enable('case sensitive routing');
+  app.enable('strict routing');
+  app.use(cors({ methods: allowedMethods }));
+
+  app.param('slug', (_request, response, next, slug: string) => {
+    if (!/^[a-z0-9-]{1,64}$/.test(slug)) {
+      response.status(404).end();
+      return;
+    }
+    next();
+  });
+
+  app.route('/r/:slug')
+    .head(methodNotAllowed)
+    .get(async (request, response) => {
+      const destination = await links.resolve(request.params.slug);
+      if (destination === null) {
+        response.status(404).end();
+        return;
+      }
+      response.set({ Location: destination, 'Cache-Control': 'no-store' }).status(302).end();
+    })
+    .all(methodNotAllowed);
+
+  app.use((_request, response) => { response.status(404).end(); });
+  app.use(handleError);
+  return app;
+}
 
 interface AppOptions {
   databasePath: string;
@@ -15,7 +70,7 @@ export async function startApp({ databasePath, port = 0, cachePrefix = '' }: App
   try {
     cache = await connectCache(cachePrefix);
     const connectedCache = cache;
-    const server = redirectServer(createLinks({ repository, cache: connectedCache }));
+    const server = createServer(createApp(createLinks({ repository, cache: connectedCache })));
 
     await new Promise<void>((resolve, reject) => {
       server.once('error', reject);
