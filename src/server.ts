@@ -1,4 +1,5 @@
-import { createServer } from 'node:http';
+import { once } from 'node:events';
+import type { AddressInfo } from 'node:net';
 import { openLinkRepository } from './adapters/postgres-links.ts';
 import { connectCache } from './adapters/valkey-cache.ts';
 import { createApp } from './app.ts';
@@ -15,43 +16,31 @@ export async function startApp({
   databaseUrl, port = 0, host = '127.0.0.1', cachePrefix = '',
 }: AppOptions) {
   const repository = await openLinkRepository(databaseUrl);
-  let cache: Awaited<ReturnType<typeof connectCache>> | undefined;
+  let closeCache: (() => void) | undefined;
+  const closeDependencies = async () => {
+    closeCache?.();
+    await repository.close();
+  };
+
   try {
-    cache = await connectCache(cachePrefix);
-    const connectedCache = cache;
-    const server = createServer(createApp(createLinks({ repository, cache: connectedCache })));
+    const cache = await connectCache(cachePrefix);
+    closeCache = cache.close;
+    const server = createApp(createLinks({ repository, cache })).listen(port, host);
+    await once(server, 'listening');
 
-    await new Promise<void>((resolve, reject) => {
-      server.once('error', reject);
-      server.listen(port, host, () => {
-        server.off('error', reject);
-        resolve();
-      });
-    });
-
-    const address = server.address();
-    if (!address || typeof address === 'string') throw new Error('Expected a TCP listener');
-    let reachableHost = address.address;
-    if (reachableHost === '0.0.0.0') reachableHost = '127.0.0.1';
-    if (reachableHost === '::') reachableHost = '::1';
-    const originHost = address.family === 'IPv6' ? `[${reachableHost}]` : reachableHost;
     return {
-      origin: `http://${originHost}:${address.port}`,
-      disconnectCache: connectedCache.close,
+      port: (server.address() as AddressInfo).port,
+      disconnectCache: cache.close,
       async close() {
         try {
-          await new Promise<void>((resolve, reject) => {
-            server.close(error => error ? reject(error) : resolve());
-          });
+          await server[Symbol.asyncDispose]();
         } finally {
-          connectedCache.close();
-          await repository.close();
+          await closeDependencies();
         }
       },
     };
   } catch (error) {
-    cache?.close();
-    await repository.close();
+    await closeDependencies();
     throw error;
   }
 }
