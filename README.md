@@ -39,10 +39,14 @@ npm start
 
 ## Tests
 
+The `npm` service runs commands against your checkout with a separate `node_modules` volume.
+
 ```sh
-npm run typecheck
-npm test
+docker compose run --rm npm run typecheck
+docker compose run --rm npm test
 ```
+
+Run `docker compose run --rm npm ci` to refresh the volume after changing dependencies. On the host you can run `npm run typecheck` and `npm test` directly.
 
 [GitHub Actions](https://github.com/dudo/url-shortener/actions) runs the type check and application tests. The tests use in-memory doubles for the repository and cache, and can run without a local `.env`.
 
