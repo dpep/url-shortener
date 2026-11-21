@@ -10,8 +10,8 @@ const load = (path: string) => import(pathToFileURL(resolve(baselineDir, 'src', 
 const [app, links, routes, postgres, repository, valkey] = await Promise.all([
   load('app.ts'),
   load('services/links.ts'),
-  load('routes/link-routes.ts'),
-  load('db/pool.ts'),
+  load('routes/links.ts'),
+  load('adapters/postgres-pool.ts'),
   load('repositories/links.ts'),
   load('adapters/valkey-cache.ts'),
 ]);
