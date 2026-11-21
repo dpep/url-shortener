@@ -1,11 +1,9 @@
-import cors, { type CorsOptions } from 'cors';
 import express, { type Router } from 'express';
 import { handleError, notFound } from './handlers/errors.ts';
 
-export function createApp({ routes, corsOptions }: { routes: Router; corsOptions: CorsOptions }) {
+export function createApp(routes: Router[]) {
   const app = express();
   app.disable('x-powered-by');
-  app.use(cors(corsOptions));
   app.use(routes);
   app.use(notFound);
   app.use(handleError);
