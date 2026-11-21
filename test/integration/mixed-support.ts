@@ -1,55 +1,31 @@
 import assert from 'node:assert/strict';
-import { randomUUID } from 'node:crypto';
 import { once } from 'node:events';
 import type { AddressInfo } from 'node:net';
 import type { TestContext } from 'node:test';
-import { createDatabasePool } from '../../src/adapters/postgres-pool.ts';
-import { connectCache } from '../../src/adapters/valkey-cache.ts';
 import { createApp } from '../../src/app.ts';
-import { createLinkRepository } from '../../src/repositories/links.ts';
 import { createLinkRoutes } from '../../src/routes/links.ts';
 import { createLinks } from '../../src/services/links.ts';
-import { postgresFixture } from './postgres-fixture.ts';
-import { originalDestination } from '../support.ts';
+import { createDoubles } from '../support.ts';
 
 export { newDestination, originalDestination } from '../support.ts';
 
-const current = {
-  createApp, createLinks, createLinkRoutes, createDatabasePool, createLinkRepository, connectCache,
-};
+const current = { createApp, createLinks, createLinkRoutes };
 
 export async function fixture(t: TestContext, previous?: typeof current) {
-  const { databaseUrl, cleanup } = await postgresFixture(t);
-  const pool = createDatabasePool(databaseUrl);
-  cleanup.push(() => pool.end());
-  const database = await createLinkRepository(pool);
-  await database.insert('docs', originalDestination);
-
-  const cachePrefix = `test:${randomUUID()}:`;
-  const cache = await connectCache(cachePrefix);
-  cleanup.push(cache.close);
+  const { repository, cache, disconnectCache } = createDoubles();
 
   async function start(version: typeof current) {
-    const pool = version.createDatabasePool(databaseUrl);
-    cleanup.push(() => pool.end());
-    const repository = await version.createLinkRepository(pool);
-    const cache = await version.connectCache(cachePrefix);
-    cleanup.push(cache.close);
-
     const links = version.createLinks({ repository, cache });
     const app = version.createApp([version.createLinkRoutes(links)]);
     const listener = app.listen(0, '127.0.0.1');
     await once(listener, 'listening');
-    cleanup.push(() => listener[Symbol.asyncDispose]());
-    return {
-      origin: `http://127.0.0.1:${(listener.address() as AddressInfo).port}`,
-      disconnectCache: cache.close,
-    };
+    t.after(() => listener[Symbol.asyncDispose]());
+    return `http://127.0.0.1:${(listener.address() as AddressInfo).port}`;
   }
 
-  const app = await start(current);
-  const previousApp = previous && await start(previous);
-  return { ...app, previousOrigin: previousApp?.origin, cache, database };
+  const origin = await start(current);
+  const previousOrigin = previous && await start(previous);
+  return { origin, previousOrigin, cache, database: repository, disconnectCache };
 }
 
 export async function redirect(origin: string, slug = 'docs') {

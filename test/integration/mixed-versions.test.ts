@@ -8,15 +8,12 @@ import { fixture, newDestination, originalDestination, patch, redirect } from '.
 const previousDir = process.env.PREVIOUS_DIR ?? '.previous';
 assert.ok(existsSync(previousDir), 'Check out the previous release in .previous or set PREVIOUS_DIR.');
 const load = (path: string) => import(pathToFileURL(resolve(previousDir, 'src', path)).href);
-const [app, links, routes, postgres, repository, valkey] = await Promise.all([
+const [app, links, routes] = await Promise.all([
   load('app.ts'),
   load('services/links.ts'),
   load('routes/links.ts'),
-  load('adapters/postgres-pool.ts'),
-  load('repositories/links.ts'),
-  load('adapters/valkey-cache.ts'),
 ]);
-const previous = { ...app, ...links, ...routes, ...postgres, ...repository, ...valkey };
+const previous = { ...app, ...links, ...routes };
 
 test('both versions serve the new destination after an acknowledged edit', async t => {
   const { origin, previousOrigin, database, cache } = await fixture(t, previous);

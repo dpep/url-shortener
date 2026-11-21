@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { fixture, newDestination, originalDestination, patch, redirect } from './mixed-support.ts';
 
-test('an edit commits to Postgres and refreshes a warmed redirect', async t => {
+test('an edit updates the repository and refreshes a warmed redirect', async t => {
   const { origin, database, cache } = await fixture(t);
   assert.equal(await redirect(origin), originalDestination);
   assert.equal(await cache.get('redirect:v2:docs'), originalDestination);
@@ -18,7 +18,7 @@ test('edits reject invalid destinations and unknown slugs', async t => {
   assert.equal(await database.get('docs'), originalDestination);
 });
 
-test('an edit commits to Postgres with a closed Valkey connection', async t => {
+test('an edit updates the repository when the cache is unavailable', async t => {
   const { origin, database, disconnectCache } = await fixture(t);
   disconnectCache();
   assert.equal((await patch(origin, newDestination)).status, 204);

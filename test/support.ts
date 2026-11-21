@@ -7,6 +7,7 @@ export function stubCache(available = true) {
   const cached = new Map<string, string>();
   return {
     cached,
+    disconnectCache() { available = false; },
     cache: {
       async get(key: string) {
         return available ? cached.get(key) ?? null : null;
@@ -21,7 +22,7 @@ export function stubCache(available = true) {
   };
 }
 
-export function fixture({ cacheAvailable = true } = {}) {
+export function createDoubles(cacheAvailable = true) {
   const records = new Map([['docs', originalDestination]]);
   const repository = {
     get: async (slug: string) => records.get(slug) ?? null,
@@ -31,6 +32,10 @@ export function fixture({ cacheAvailable = true } = {}) {
       return true;
     },
   };
-  const { cached, cache } = stubCache(cacheAvailable);
+  return { repository, records, ...stubCache(cacheAvailable) };
+}
+
+export function fixture({ cacheAvailable = true } = {}) {
+  const { repository, cache, records, cached } = createDoubles(cacheAvailable);
   return { links: createLinks({ repository, cache }), records, cached };
 }
