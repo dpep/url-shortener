@@ -25,7 +25,7 @@ export async function fixture(t: TestContext, { startBaseline }: FixtureOptions 
   const databasePath = join(directory, 'links.sqlite');
   const database = openLinkRepository(databasePath);
   cleanup.push(() => database.close());
-  database.insert('launch', originalDestination);
+  database.insert('docs', originalDestination);
 
   const cachePrefix = `test:${randomUUID()}:`;
   const cache = await connectCache(cachePrefix);
@@ -37,14 +37,14 @@ export async function fixture(t: TestContext, { startBaseline }: FixtureOptions 
   return { ...app, baselineOrigin: baseline?.origin, cache, database };
 }
 
-export async function redirect(origin: string, slug = 'launch') {
+export async function redirect(origin: string, slug = 'docs') {
   const response = await fetch(`${origin}/r/${slug}`, { redirect: 'manual' });
   assert.equal(response.status, 302);
   assert.equal(response.headers.get('cache-control'), 'no-store');
   return response.headers.get('location');
 }
 
-export function patch(origin: string, destination: string, slug = 'launch') {
+export function patch(origin: string, destination: string, slug = 'docs') {
   return fetch(`${origin}/r/${slug}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
