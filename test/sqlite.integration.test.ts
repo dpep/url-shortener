@@ -13,24 +13,24 @@ function databaseFile(t: TestContext) {
   return join(directory, 'links.sqlite');
 }
 
-test('a fresh database has no demo link', async t => {
+test('a fresh database has no matching link', async t => {
   const repository = openLinkRepository(databaseFile(t));
   try {
     const { cache, cached } = stubCache();
     const links = createLinks({ repository, cache });
-    assert.equal(await links.resolve('launch'), null);
+    assert.equal(await links.resolve('docs'), null);
     assert.equal(cached.size, 0);
   } finally {
     repository.close();
   }
 });
 
-test('a duplicate seed preserves the original link across connections', async t => {
+test('a duplicate insert preserves the original link across connections', async t => {
   const filename = databaseFile(t);
   const writer = openLinkRepository(filename);
   try {
-    assert.equal(writer.insert('launch', originalDestination), true);
-    assert.equal(writer.insert('launch', 'https://duplicate.example/launch'), false);
+    assert.equal(writer.insert('docs', originalDestination), true);
+    assert.equal(writer.insert('docs', 'https://duplicate.example/docs'), false);
   } finally {
     writer.close();
   }
@@ -39,8 +39,8 @@ test('a duplicate seed preserves the original link across connections', async t 
   try {
     const { cache, cached } = stubCache();
     const links = createLinks({ repository, cache });
-    assert.equal(await links.resolve('launch'), originalDestination);
-    assert.equal(cached.get('redirect:launch'), originalDestination);
+    assert.equal(await links.resolve('docs'), originalDestination);
+    assert.equal(cached.get('redirect:docs'), originalDestination);
   } finally {
     repository.close();
   }
