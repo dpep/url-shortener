@@ -2,7 +2,7 @@ import { connectCache } from './adapters/valkey-cache.ts';
 import { createApp } from './app.ts';
 import { createDatabasePool } from './db/pool.ts';
 import { createLinkRepository } from './repositories/links.ts';
-import { createLinkRoutes, linkMethods } from './routes/link-routes.ts';
+import { createLinkRoutes } from './routes/link-routes.ts';
 import { createLinks } from './services/links.ts';
 
 const databaseUrl = process.env.DATABASE_URL;
@@ -14,10 +14,9 @@ const pool = createDatabasePool(databaseUrl);
 const repository = await createLinkRepository(pool);
 const cache = await connectCache();
 const links = createLinks({ repository, cache });
-const app = createApp({
-  routes: createLinkRoutes(links),
-  corsOptions: { methods: linkMethods },
-});
+const app = createApp([
+  createLinkRoutes(links),
+]);
 
 const listener = app.listen(port, host, error => {
   if (error) throw error;
