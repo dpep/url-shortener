@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import type { TestContext } from 'node:test';
 import { openLinkRepository } from '../src/adapters/postgres-links.ts';
 import { connectCache } from '../src/adapters/valkey-cache.ts';
-import { startApp } from '../src/app.ts';
+import { startApp } from '../src/server.ts';
 
 import { postgresFixture } from './postgres-fixture.ts';
 import { originalDestination } from './support.ts';

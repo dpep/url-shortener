@@ -6,8 +6,8 @@ import { fixture, newDestination, originalDestination, patch, redirect } from '.
 
 const baselineDir = process.env.BASELINE_DIR;
 assert.ok(baselineDir, 'Set BASELINE_DIR to a checkout of the base commit with npm ci run.');
-const baseline: typeof import('../src/app.ts') = await import(
-  pathToFileURL(resolve(baselineDir, 'src/app.ts')).href
+const baseline: typeof import('../src/server.ts') = await import(
+  pathToFileURL(resolve(baselineDir, 'src/server.ts')).href
 );
 
 test('both versions serve the new destination after an acknowledged edit', async t => {
