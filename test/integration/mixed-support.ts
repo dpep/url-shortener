@@ -3,16 +3,16 @@ import { randomUUID } from 'node:crypto';
 import { once } from 'node:events';
 import type { AddressInfo } from 'node:net';
 import type { TestContext } from 'node:test';
-import { createDatabasePool } from '../src/adapters/postgres-pool.ts';
-import { connectCache } from '../src/adapters/valkey-cache.ts';
-import { createApp } from '../src/app.ts';
-import { createLinkRepository } from '../src/repositories/links.ts';
-import { createLinkRoutes } from '../src/routes/links.ts';
-import { createLinks } from '../src/services/links.ts';
+import { createDatabasePool } from '../../src/adapters/postgres-pool.ts';
+import { connectCache } from '../../src/adapters/valkey-cache.ts';
+import { createApp } from '../../src/app.ts';
+import { createLinkRepository } from '../../src/repositories/links.ts';
+import { createLinkRoutes } from '../../src/routes/links.ts';
+import { createLinks } from '../../src/services/links.ts';
 import { postgresFixture } from './postgres-fixture.ts';
-import { originalDestination } from './support.ts';
+import { originalDestination } from '../support.ts';
 
-export { newDestination, originalDestination } from './support.ts';
+export { newDestination, originalDestination } from '../support.ts';
 
 const current = {
   createApp, createLinks, createLinkRoutes, createDatabasePool, createLinkRepository, connectCache,
