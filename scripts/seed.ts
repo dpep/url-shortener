@@ -1,4 +1,4 @@
-import { createDatabasePool } from '../src/db/pool.ts';
+import { createDatabasePool } from '../src/adapters/postgres-pool.ts';
 import { createLinkRepository } from '../src/repositories/links.ts';
 
 const databaseUrl = process.env.DATABASE_URL;

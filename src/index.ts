@@ -1,8 +1,8 @@
+import { createDatabasePool } from './adapters/postgres-pool.ts';
 import { connectCache } from './adapters/valkey-cache.ts';
 import { createApp } from './app.ts';
-import { createDatabasePool } from './db/pool.ts';
 import { createLinkRepository } from './repositories/links.ts';
-import { createLinkRoutes } from './routes/link-routes.ts';
+import { createLinkRoutes } from './routes/links.ts';
 import { createLinks } from './services/links.ts';
 
 const databaseUrl = process.env.DATABASE_URL;
