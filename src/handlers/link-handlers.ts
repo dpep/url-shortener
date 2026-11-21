@@ -1,5 +1,5 @@
 import type { RequestHandler, RequestParamHandler } from 'express';
-import type { LinkService } from '../application/links.ts';
+import type { LinkService } from '../services/links.ts';
 
 export const validateSlug: RequestParamHandler = (_request, response, next, slug: string) => {
   if (!/^[a-z0-9-]{1,64}$/.test(slug)) {

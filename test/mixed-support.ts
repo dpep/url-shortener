@@ -26,7 +26,13 @@ export async function fixture(t: TestContext, { startBaseline }: FixtureOptions 
   cleanup.push(() => app.close());
   const baseline = startBaseline && await startBaseline({ databaseUrl, cachePrefix });
   if (baseline) cleanup.push(() => baseline.close());
-  return { ...app, baselineOrigin: baseline?.origin, cache, database };
+  return {
+    origin: `http://127.0.0.1:${app.port}`,
+    baselineOrigin: baseline && `http://127.0.0.1:${baseline.port}`,
+    disconnectCache: app.disconnectCache,
+    cache,
+    database,
+  };
 }
 
 export async function redirect(origin: string, slug = 'docs') {
