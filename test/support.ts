@@ -24,8 +24,8 @@ export function stubCache(available = true) {
 export function fixture({ cacheAvailable = true } = {}) {
   const records = new Map([['docs', originalDestination]]);
   const repository = {
-    get: (slug: string) => records.get(slug) ?? null,
-    update(slug: string, destination: string) {
+    get: async (slug: string) => records.get(slug) ?? null,
+    async update(slug: string, destination: string) {
       if (!records.has(slug)) return false;
       records.set(slug, destination);
       return true;

@@ -1,13 +1,11 @@
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
-import { mkdtempSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 import type { TestContext } from 'node:test';
-import { openLinkRepository } from '../src/adapters/sqlite-links.ts';
+import { openLinkRepository } from '../src/adapters/postgres-links.ts';
 import { connectCache } from '../src/adapters/valkey-cache.ts';
 import { startApp } from '../src/app.ts';
 
+import { postgresFixture } from './postgres-fixture.ts';
 import { originalDestination } from './support.ts';
 export { newDestination, originalDestination } from './support.ts';
 
@@ -16,23 +14,17 @@ interface FixtureOptions {
 }
 
 export async function fixture(t: TestContext, { startBaseline }: FixtureOptions = {}) {
-  const directory = mkdtempSync(join(tmpdir(), 'short-link-review-'));
-  const cleanup: Array<() => void | Promise<void>> = [() => rmSync(directory, { recursive: true, force: true })];
-  t.after(async () => {
-    for (const dispose of cleanup.reverse()) await dispose();
-  });
-
-  const databasePath = join(directory, 'links.sqlite');
-  const database = openLinkRepository(databasePath);
+  const { databaseUrl, cleanup } = await postgresFixture(t);
+  const database = await openLinkRepository(databaseUrl);
   cleanup.push(() => database.close());
-  database.insert('docs', originalDestination);
+  await database.insert('docs', originalDestination);
 
   const cachePrefix = `test:${randomUUID()}:`;
   const cache = await connectCache(cachePrefix);
   cleanup.push(() => cache.close());
-  const app = await startApp({ databasePath, cachePrefix });
+  const app = await startApp({ databaseUrl, cachePrefix });
   cleanup.push(() => app.close());
-  const baseline = startBaseline && await startBaseline({ databasePath, cachePrefix });
+  const baseline = startBaseline && await startBaseline({ databaseUrl, cachePrefix });
   if (baseline) cleanup.push(() => baseline.close());
   return { ...app, baselineOrigin: baseline?.origin, cache, database };
 }

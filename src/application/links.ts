@@ -1,8 +1,8 @@
 const cacheKey = (slug: string) => `redirect:v2:${slug}`;
 
 interface LinkRepository {
-  get(slug: string): string | null;
-  update(slug: string, destination: string): boolean;
+  get(slug: string): Promise<string | null>;
+  update(slug: string, destination: string): Promise<boolean>;
 }
 
 interface LinkCache {
@@ -18,13 +18,13 @@ export function createLinks({ repository, cache }: { repository: LinkRepository;
       const cached = await cache.get(key);
       if (cached !== null) return cached;
 
-      const destination = repository.get(slug);
+      const destination = await repository.get(slug);
       if (destination !== null) await cache.set(key, destination);
       return destination;
     },
 
     async retarget(slug: string, destination: string) {
-      if (!repository.update(slug, destination)) return false;
+      if (!(await repository.update(slug, destination))) return false;
       await cache.delete(cacheKey(slug));
       return true;
     },

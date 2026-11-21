@@ -10,18 +10,20 @@
     "seed": "node --env-file=.env scripts/seed.ts",
     "typecheck": "tsc --noEmit",
     "test": "node --test test/redirect.test.ts test/retarget.test.ts",
-    "test:retarget-integration": "node --test test/retarget.integration.test.ts",
-    "test:mixed": "node --test test/mixed-versions.test.ts"
+    "test:retarget-integration": "node --env-file-if-exists=.env --test test/retarget.integration.test.ts",
+    "test:mixed": "node --env-file-if-exists=.env --test test/mixed-versions.test.ts"
   },
   "dependencies": {
     "@redis/client": "6.3.1",
     "cors": "2.8.6",
-    "express": "5.3.0"
+    "express": "5.3.0",
+    "pg": "8.23.1"
   },
   "devDependencies": {
     "@types/cors": "2.8.19",
     "@types/express": "5.0.6",
     "@types/node": "24.19.2",
+    "@types/pg": "8.23.1",
     "typescript": "7.0.2"
   }
 }

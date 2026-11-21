@@ -2,12 +2,12 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { fixture, newDestination, originalDestination, patch, redirect } from './mixed-support.ts';
 
-test('an edit commits to SQLite and refreshes a warmed redirect', async t => {
+test('an edit commits to Postgres and refreshes a warmed redirect', async t => {
   const { origin, database, cache } = await fixture(t);
   assert.equal(await redirect(origin), originalDestination);
   assert.equal(await cache.get('redirect:v2:docs'), originalDestination);
   assert.equal((await patch(origin, newDestination)).status, 204);
-  assert.equal(database.get('docs'), newDestination);
+  assert.equal(await database.get('docs'), newDestination);
   assert.equal(await redirect(origin), newDestination);
 });
 
@@ -15,14 +15,14 @@ test('edits reject invalid destinations and unknown slugs', async t => {
   const { origin, database } = await fixture(t);
   assert.equal((await patch(origin, '/relative')).status, 400);
   assert.equal((await patch(origin, newDestination, 'missing')).status, 404);
-  assert.equal(database.get('docs'), originalDestination);
+  assert.equal(await database.get('docs'), originalDestination);
 });
 
-test('an edit commits to SQLite with a closed Valkey connection', async t => {
+test('an edit commits to Postgres with a closed Valkey connection', async t => {
   const { origin, database, disconnectCache } = await fixture(t);
   disconnectCache();
   assert.equal((await patch(origin, newDestination)).status, 204);
-  assert.equal(database.get('docs'), newDestination);
+  assert.equal(await database.get('docs'), newDestination);
   assert.equal(await redirect(origin), newDestination);
 });
 
@@ -44,5 +44,5 @@ test('the edit route supports CORS preflight and rejects invalid JSON bodies', a
   assert.equal((await send('{"destination":')).status, 400);
   const oversize = JSON.stringify({ destination: 'https://new.example/' + 'a'.repeat(4096) });
   assert.equal((await send(oversize)).status, 413);
-  assert.equal(database.get('docs'), originalDestination);
+  assert.equal(await database.get('docs'), originalDestination);
 });

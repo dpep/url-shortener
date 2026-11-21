@@ -22,7 +22,7 @@ test('both versions serve the new destination after an acknowledged edit', async
   assert.equal(await cache.get('redirect:v2:docs'), originalDestination);
 
   assert.equal((await patch(origin, newDestination)).status, 204);
-  assert.equal(database.get('docs'), newDestination);
+  assert.equal(await database.get('docs'), newDestination);
   assert.equal(await redirect(origin), newDestination);
   assert.equal(await redirect(baselineOrigin), newDestination, 'Location served by baseline');
 });

@@ -22,18 +22,8 @@ jobs:
             event: push
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    services:
-      valkey:
-        image: ${{ matrix.suite == 'mixed' && 'valkey/valkey:9.1.4' || '' }}
-        ports:
-          - 6380:6379
-        options: >-
-          --health-cmd "valkey-cli ping"
-          --health-interval 1s
-          --health-timeout 1s
-          --health-retries 10
     env:
-      VALKEY_URL: redis://127.0.0.1:6380
+      TEST_DATABASE_URL: postgresql://shortener:shortener@127.0.0.1:5433/shortener
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -55,9 +45,13 @@ jobs:
           persist-credentials: false
       - run: npm ci --omit=dev --prefix .baseline
         if: matrix.suite == 'mixed'
+      - run: docker compose up -d --wait --wait-timeout 50
+        if: matrix.suite == 'mixed'
       - run: npm run test:retarget-integration
         if: matrix.suite == 'mixed'
       - run: npm run test:mixed
         if: matrix.suite == 'mixed'
         env:
           BASELINE_DIR: .baseline
+      - if: always() && matrix.suite == 'mixed'
+        run: docker compose down --volumes
