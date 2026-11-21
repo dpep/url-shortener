@@ -1,14 +1,16 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { openLinkRepository } from '../src/adapters/postgres-links.ts';
+import { createDatabasePool } from '../src/db/pool.ts';
+import { createLinkRepository } from '../src/repositories/links.ts';
 import { createLinks } from '../src/services/links.ts';
 import { postgresFixture } from './postgres-fixture.ts';
 import { originalDestination, stubCache } from './support.ts';
 
 test('a fresh schema has no matching link', async t => {
   const { databaseUrl, cleanup } = await postgresFixture(t);
-  const repository = await openLinkRepository(databaseUrl);
-  cleanup.push(() => repository.close());
+  const pool = createDatabasePool(databaseUrl);
+  cleanup.push(() => pool.end());
+  const repository = await createLinkRepository(pool);
   const { cache, cached } = stubCache();
   const links = createLinks({ repository, cache });
   assert.equal(await links.resolve('docs'), null);
@@ -17,16 +19,18 @@ test('a fresh schema has no matching link', async t => {
 
 test('a duplicate insert preserves the original link across connections', async t => {
   const { databaseUrl, cleanup } = await postgresFixture(t);
-  const writer = await openLinkRepository(databaseUrl);
+  const writerPool = createDatabasePool(databaseUrl);
   try {
+    const writer = await createLinkRepository(writerPool);
     assert.equal(await writer.insert('docs', originalDestination), true);
     assert.equal(await writer.insert('docs', 'https://duplicate.example/docs'), false);
   } finally {
-    await writer.close();
+    await writerPool.end();
   }
 
-  const repository = await openLinkRepository(databaseUrl);
-  cleanup.push(() => repository.close());
+  const pool = createDatabasePool(databaseUrl);
+  cleanup.push(() => pool.end());
+  const repository = await createLinkRepository(pool);
   const { cache, cached } = stubCache();
   const links = createLinks({ repository, cache });
   assert.equal(await links.resolve('docs'), originalDestination);
