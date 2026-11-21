@@ -1,0 +1,21 @@
+import { Router, type RequestHandler } from 'express';
+import type { LinkService } from '../application/links.ts';
+import { createLinkHandlers, validateSlug } from '../handlers/link-handlers.ts';
+
+export const linkMethods = ['GET'];
+
+export function createLinkRoutes(links: LinkService) {
+  const router = Router({ caseSensitive: true, strict: true });
+  const { redirect } = createLinkHandlers(links);
+  const methodNotAllowed: RequestHandler = (_request, response) => {
+    response.set('Allow', linkMethods.join(', ')).status(405).end();
+  };
+
+  router.param('slug', validateSlug);
+  router.route('/r/:slug')
+    .head(methodNotAllowed)
+    .get(redirect)
+    .all(methodNotAllowed);
+
+  return router;
+}
