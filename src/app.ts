@@ -1,6 +1,6 @@
 import cors from 'cors';
 import express from 'express';
-import type { LinkService } from './application/links.ts';
+import type { LinkService } from './services/links.ts';
 import { handleError, notFound } from './handlers/errors.ts';
 import { createLinkRoutes, linkMethods } from './routes/link-routes.ts';
 

@@ -3,7 +3,7 @@ import type { AddressInfo } from 'node:net';
 import { openLinkRepository } from './adapters/postgres-links.ts';
 import { connectCache } from './adapters/valkey-cache.ts';
 import { createApp } from './app.ts';
-import { createLinks } from './application/links.ts';
+import { createLinks } from './services/links.ts';
 
 interface AppOptions {
   databaseUrl: string;
