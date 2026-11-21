@@ -1,5 +1,5 @@
 import { Router, type RequestHandler } from 'express';
-import type { LinkService } from '../application/links.ts';
+import type { LinkService } from '../services/links.ts';
 import { createLinkHandlers, validateSlug } from '../handlers/link-handlers.ts';
 
 export const linkMethods = ['GET'];

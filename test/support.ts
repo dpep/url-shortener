@@ -1,4 +1,4 @@
-import { createLinks } from '../src/application/links.ts';
+import { createLinks } from '../src/services/links.ts';
 
 export const originalDestination = 'https://old.example/docs';
 

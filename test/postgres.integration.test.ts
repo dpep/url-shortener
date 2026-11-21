@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { openLinkRepository } from '../src/adapters/postgres-links.ts';
-import { createLinks } from '../src/application/links.ts';
+import { createLinks } from '../src/services/links.ts';
 import { postgresFixture } from './postgres-fixture.ts';
 import { originalDestination, stubCache } from './support.ts';
 
