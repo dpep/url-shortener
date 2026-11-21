@@ -3,21 +3,23 @@ import { randomUUID } from 'node:crypto';
 import { once } from 'node:events';
 import type { AddressInfo } from 'node:net';
 import type { TestContext } from 'node:test';
-import { openLinkRepository } from '../src/adapters/postgres-links.ts';
 import { connectCache } from '../src/adapters/valkey-cache.ts';
 import { createApp } from '../src/app.ts';
+import { createDatabasePool } from '../src/db/pool.ts';
+import { createLinkRepository } from '../src/repositories/links.ts';
 import { createLinks } from '../src/services/links.ts';
 import { postgresFixture } from './postgres-fixture.ts';
 import { originalDestination } from './support.ts';
 
 export { newDestination, originalDestination } from './support.ts';
 
-const current = { createApp, createLinks, openLinkRepository, connectCache };
+const current = { createApp, createLinks, createDatabasePool, createLinkRepository, connectCache };
 
 export async function fixture(t: TestContext, { baseline }: { baseline?: typeof current } = {}) {
   const { databaseUrl, cleanup } = await postgresFixture(t);
-  const database = await openLinkRepository(databaseUrl);
-  cleanup.push(database.close);
+  const pool = createDatabasePool(databaseUrl);
+  cleanup.push(() => pool.end());
+  const database = await createLinkRepository(pool);
   await database.insert('docs', originalDestination);
 
   const cachePrefix = `test:${randomUUID()}:`;
@@ -25,8 +27,9 @@ export async function fixture(t: TestContext, { baseline }: { baseline?: typeof 
   cleanup.push(cache.close);
 
   async function start(version: typeof current) {
-    const repository = await version.openLinkRepository(databaseUrl);
-    cleanup.push(repository.close);
+    const pool = version.createDatabasePool(databaseUrl);
+    cleanup.push(() => pool.end());
+    const repository = await version.createLinkRepository(pool);
     const cache = await version.connectCache(cachePrefix);
     cleanup.push(cache.close);
 

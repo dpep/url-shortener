@@ -1,4 +1,5 @@
-import { openLinkRepository } from '../src/adapters/postgres-links.ts';
+import { createDatabasePool } from '../src/db/pool.ts';
+import { createLinkRepository } from '../src/repositories/links.ts';
 
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl?.trim()) throw new Error('Ensure DATABASE_URL is set');
@@ -13,13 +14,14 @@ if (!url || !['http:', 'https:'].includes(url.protocol)) {
   throw new Error('Provide an absolute HTTP or HTTPS destination');
 }
 
-const repository = await openLinkRepository(databaseUrl);
+const pool = createDatabasePool(databaseUrl);
 try {
+  const repository = await createLinkRepository(pool);
   if (await repository.insert(slug, url.href)) {
     console.log(`Added /r/${slug}`);
   } else {
     console.log(`Slug ${slug} already exists`);
   }
 } finally {
-  await repository.close();
+  await pool.end();
 }
