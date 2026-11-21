@@ -20,11 +20,12 @@ Use Node.js 24.12 or later with npm. Docker Compose runs Valkey for the local ap
 ```sh
 npm ci
 cp .env.example .env
+npm run seed -- docs https://example.com/docs
 docker compose up -d --wait
 npm start
 ```
 
-Startup creates the SQLite schema. Populate the `links` table with your own `slug` and `destination` values, then request `/r/:slug`. Edit `DATABASE_PATH`, `PORT`, `HOST`, and `VALKEY_URL` in `.env` as needed.
+Replace the seed arguments with your own slug and destination. The command creates the schema and preserves any existing entry for that slug. For the example above, request `http://127.0.0.1:3100/r/docs`. Edit `DATABASE_PATH`, `PORT`, `HOST`, and `VALKEY_URL` in `.env` as needed.
 
 Stop the service and run `docker compose down` when finished.
 
