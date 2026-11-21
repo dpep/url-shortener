@@ -12,7 +12,7 @@ A small TypeScript HTTP service that resolves short links. `GET /r/:slug` return
 | [Postgres repository](src/adapters/postgres-links.ts) | Read and write authoritative destinations in Postgres. |
 | [Valkey adapter](src/adapters/valkey-cache.ts) | Store cached destinations for 60 seconds. Cache command failures are handled as misses or skipped fills. |
 
-[`src/index.ts`](src/index.ts) reads runtime configuration and starts the service. [`src/server.ts`](src/server.ts) connects the adapters and manages the listener.
+[`src/index.ts`](src/index.ts) reads runtime configuration, connects the adapters, and calls `app.listen()`.
 
 ## Run locally
 
