@@ -1,7 +1,7 @@
 import { createServer } from 'node:http';
 import cors from 'cors';
 import express, { type ErrorRequestHandler } from 'express';
-import { openLinkRepository } from './adapters/sqlite-links.ts';
+import { openLinkRepository } from './adapters/postgres-links.ts';
 import { connectCache } from './adapters/valkey-cache.ts';
 import { createLinks } from './application/links.ts';
 
@@ -59,16 +59,16 @@ export function createApp(links: ReturnType<typeof createLinks>) {
 }
 
 interface AppOptions {
-  databasePath: string;
+  databaseUrl: string;
   port?: number;
   host?: string;
   cachePrefix?: string;
 }
 
 export async function startApp({
-  databasePath, port = 0, host = '127.0.0.1', cachePrefix = '',
+  databaseUrl, port = 0, host = '127.0.0.1', cachePrefix = '',
 }: AppOptions) {
-  const repository = openLinkRepository(databasePath);
+  const repository = await openLinkRepository(databaseUrl);
   let cache: Awaited<ReturnType<typeof connectCache>> | undefined;
   try {
     cache = await connectCache(cachePrefix);
@@ -99,13 +99,13 @@ export async function startApp({
           });
         } finally {
           connectedCache.close();
-          repository.close();
+          await repository.close();
         }
       },
     };
   } catch (error) {
     cache?.close();
-    repository.close();
+    await repository.close();
     throw error;
   }
 }

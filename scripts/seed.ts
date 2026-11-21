@@ -1,7 +1,7 @@
-import { openLinkRepository } from '../src/adapters/sqlite-links.ts';
+import { openLinkRepository } from '../src/adapters/postgres-links.ts';
 
-const databasePath = process.env.DATABASE_PATH;
-if (!databasePath?.trim()) throw new Error('Ensure DATABASE_PATH is set');
+const databaseUrl = process.env.DATABASE_URL;
+if (!databaseUrl?.trim()) throw new Error('Ensure DATABASE_URL is set');
 
 const [slug, destination] = process.argv.slice(2);
 if (process.argv.length !== 4 || !slug || !/^[a-z0-9-]{1,64}$/.test(slug) || !destination) {
@@ -13,13 +13,13 @@ if (!url || !['http:', 'https:'].includes(url.protocol)) {
   throw new Error('Provide an absolute HTTP or HTTPS destination');
 }
 
-const repository = openLinkRepository(databasePath);
+const repository = await openLinkRepository(databaseUrl);
 try {
-  if (repository.insert(slug, url.href)) {
+  if (await repository.insert(slug, url.href)) {
     console.log(`Added /r/${slug}`);
   } else {
     console.log(`Slug ${slug} already exists`);
   }
 } finally {
-  repository.close();
+  await repository.close();
 }
