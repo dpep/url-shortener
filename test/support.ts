@@ -19,7 +19,7 @@ export function stubCache(available = true) {
 
 export function fixture({ cacheAvailable = true } = {}) {
   const records = new Map([['docs', originalDestination]]);
-  const repository = { get: (slug: string) => records.get(slug) ?? null };
+  const repository = { get: async (slug: string) => records.get(slug) ?? null };
   const { cached, cache } = stubCache(cacheAvailable);
   return { links: createLinks({ repository, cache }), records, cached };
 }
