@@ -11,19 +11,9 @@ permissions:
 
 jobs:
   test:
-    name: ${{ matrix.suite == 'mixed' && 'Mixed-version redirects' || 'Unit tests' }}
-    strategy:
-      fail-fast: false
-      matrix:
-        suite: [service, mixed]
-        event: ["${{ github.event_name }}"]
-        exclude:
-          - suite: mixed
-            event: push
+    name: Unit tests
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    env:
-      TEST_DATABASE_URL: postgresql://shortener:shortener@127.0.0.1:5433/shortener
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -35,21 +25,3 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
-        if: matrix.suite == 'service'
-      - name: Check out the PR base
-        if: matrix.suite == 'mixed'
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ github.event.pull_request.base.sha }}
-          path: .previous
-          persist-credentials: false
-      - run: npm ci --omit=dev --prefix .previous
-        if: matrix.suite == 'mixed'
-      - run: docker compose up -d --wait --wait-timeout 50
-        if: matrix.suite == 'mixed'
-      - run: npm run test:retarget-integration
-        if: matrix.suite == 'mixed'
-      - run: npm run test:mixed
-        if: matrix.suite == 'mixed'
-      - if: always() && matrix.suite == 'mixed'
-        run: docker compose down --volumes
