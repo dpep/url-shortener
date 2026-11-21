@@ -1,9 +1,21 @@
 name: url-shortener
 
 services:
-  app:
-    build: .
+  npm: &npm
+    profiles: [tools]
+    build:
+      context: .
+      target: tools
+    entrypoint: ["npm"]
+    command: ["help"]
     env_file: .env.compose
+    volumes:
+      - .:/usr/src/app
+      - node_modules:/usr/src/app/node_modules
+  app:
+    <<: *npm
+    profiles: []
+    command: ["run", "start"]
     ports:
       - "127.0.0.1:3100:3100"
     depends_on:
@@ -16,17 +28,6 @@ services:
       interval: 1s
       timeout: 3s
       retries: 20
-  npm:
-    profiles: [tools]
-    build:
-      context: .
-      target: tools
-    entrypoint: ["npm"]
-    command: ["help"]
-    env_file: .env.compose
-    volumes:
-      - .:/usr/src/app
-      - node_modules:/usr/src/app/node_modules
   postgres:
     image: postgres:18.7-bookworm
     environment:
