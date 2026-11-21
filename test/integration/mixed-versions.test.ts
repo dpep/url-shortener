@@ -3,7 +3,7 @@ import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import test from 'node:test';
 import { pathToFileURL } from 'node:url';
-import { fixture, newDestination, originalDestination, patch, redirect } from './mixed-support.ts';
+import { fixture, newDestination, originalDestination, patch, redirect } from './support.ts';
 
 const previousDir = process.env.PREVIOUS_DIR ?? '.previous';
 assert.ok(existsSync(previousDir), 'Check out the previous release in .previous or set PREVIOUS_DIR.');
