@@ -7,9 +7,9 @@ A small TypeScript HTTP service that resolves short links. `GET /r/:slug` return
 | Layer | Responsibility |
 | --- | --- |
 | [Express app](src/app.ts) | Register middleware and mount the router. |
-| [Routes](src/routes/link-routes.ts) and [handlers](src/handlers/link-handlers.ts) | Map requests to application operations and HTTP responses. |
+| [Routes](src/routes/links.ts) and [handlers](src/handlers/links.ts) | Map requests to application operations and HTTP responses. |
 | [Application service](src/services/links.ts) | Look up a cached destination, fall back to the source of truth, and fill the cache. |
-| [Postgres pool](src/db/pool.ts) | Provide shared database connections. |
+| [Postgres pool](src/adapters/postgres-pool.ts) | Provide shared database connections. |
 | [Link repository](src/repositories/links.ts) | Own the SQL for reading and writing short links. |
 | [Valkey adapter](src/adapters/valkey-cache.ts) | Store cached destinations for 60 seconds. Cache command failures are handled as misses or skipped fills. |
 

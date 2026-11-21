@@ -1,7 +1,7 @@
 import cors from 'cors';
 import { Router, type RequestHandler } from 'express';
 import type { LinkService } from '../services/links.ts';
-import { createLinkHandlers, validateSlug } from '../handlers/link-handlers.ts';
+import { createLinkHandlers, validateSlug } from '../handlers/links.ts';
 
 const linkMethods = ['GET'];
 
