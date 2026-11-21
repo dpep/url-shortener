@@ -55,11 +55,11 @@ Run `docker compose run --rm npm ci` to refresh the volume after changing depend
 
 ### Postgres integration
 
-With `TEST_DATABASE_URL` set in `.env`, start Postgres and run the integration check.
+After copying `.env.example` to `.env`, start Postgres and run the integration check through the npm service.
 
 ```sh
 docker compose up -d --wait postgres
-npm run test:integration
+docker compose run --rm npm run test:integration
 ```
 
 Each test creates an isolated Postgres schema and uses the in-memory cache double. The suite runs as its own GitHub Actions job.

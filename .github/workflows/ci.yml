@@ -41,6 +41,7 @@ jobs:
           node-version: 24
           package-manager-cache: false
       - run: npm ci
+      - run: cp .env.example .env
       - run: docker compose up -d --wait --wait-timeout 50 postgres
       - run: npm run test:integration
       - if: always()
