@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { createDatabasePool } from '../src/db/pool.ts';
+import { createDatabasePool } from '../src/adapters/postgres-pool.ts';
 import { createLinkRepository } from '../src/repositories/links.ts';
 import { createLinks } from '../src/services/links.ts';
 import { postgresFixture } from './postgres-fixture.ts';
