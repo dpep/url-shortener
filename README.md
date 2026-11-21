@@ -6,12 +6,13 @@ A small TypeScript HTTP service that resolves short links. `GET /r/:slug` return
 
 | Layer | Responsibility |
 | --- | --- |
-| [HTTP](src/app.ts) | Match Express routes, apply CORS, and translate application results into HTTP responses. |
+| [Express app](src/app.ts) | Register middleware and mount the router. |
+| [Routes](src/routes/link-routes.ts) and [handlers](src/handlers/link-handlers.ts) | Map requests to application operations and HTTP responses. |
 | [Application](src/application/links.ts) | Look up a cached destination, fall back to the source of truth, and fill the cache. |
 | [Postgres repository](src/adapters/postgres-links.ts) | Read and write authoritative destinations in Postgres. |
 | [Valkey adapter](src/adapters/valkey-cache.ts) | Store cached destinations for 60 seconds. Cache command failures are handled as misses or skipped fills. |
 
-[`src/index.ts`](src/index.ts) reads runtime configuration and starts the service. [`src/app.ts`](src/app.ts) wires the layers together.
+[`src/index.ts`](src/index.ts) reads runtime configuration and starts the service. [`src/server.ts`](src/server.ts) connects the adapters and manages the listener.
 
 ## Run locally
 

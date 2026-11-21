@@ -1,4 +1,4 @@
-import { startApp } from './app.ts';
+import { startApp } from './server.ts';
 
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl?.trim()) throw new Error('Ensure DATABASE_URL is set');

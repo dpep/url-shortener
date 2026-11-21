@@ -22,3 +22,5 @@ export function createLinks({ repository, cache }: { repository: LinkRepository;
     },
   };
 }
+
+export type LinkService = ReturnType<typeof createLinks>;
