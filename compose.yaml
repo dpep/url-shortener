@@ -1,4 +1,23 @@
 services:
+  app:
+    build: .
+    environment:
+      HOST: 0.0.0.0
+      PORT: "3100"
+      DATABASE_URL: postgresql://shortener:shortener@postgres:5432/shortener
+      VALKEY_URL: redis://valkey:6379
+    ports:
+      - "127.0.0.1:3100:3100"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      valkey:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3100/').catch(() => process.exit(1))"]
+      interval: 1s
+      timeout: 3s
+      retries: 20
   postgres:
     image: postgres:18.7-bookworm
     environment:

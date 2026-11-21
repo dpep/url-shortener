@@ -17,21 +17,25 @@ A small TypeScript HTTP service that resolves short links. `GET /r/:slug` return
 
 ## Run locally
 
-Use Node.js 24.12 or later with npm. Docker Compose runs Postgres and Valkey for the local app.
+Docker Compose runs the shortener, Postgres, and Valkey. Seed a link, then start the app.
 
 ```sh
+docker compose run --build --rm app node scripts/seed.ts docs https://example.com/docs
+docker compose up -d --wait
+curl -i http://127.0.0.1:3100/r/docs
+```
+
+The seed command preserves any existing entry for the slug. Postgres loads [the schema](db/schema.sql) when Compose initializes its data volume. Apply future schema changes to existing volumes with a migration. Run `docker compose up -d --build --wait app` after editing the app, and `docker compose down` when finished.
+
+To run the app on the host with Node.js 24.12 or later, start only Postgres and Valkey and copy the host settings.
+
+```sh
+docker compose up -d --wait postgres valkey
 npm ci
 cp .env.example .env
-docker compose up -d --wait
 npm run seed -- docs https://example.com/docs
 npm start
 ```
-
-Replace the seed arguments with your own slug and destination. The seed command preserves any existing entry for that slug. Postgres loads [the schema](db/schema.sql) when Compose initializes its data volume. Apply future schema changes to existing volumes with a migration. For the example above, request `http://127.0.0.1:3100/r/docs`. Edit `DATABASE_URL`, `PORT`, `HOST`, and `VALKEY_URL` in `.env` as needed.
-
-Stop the service and run `docker compose down` when finished.
-
-When running the app inside a container, set `HOST=0.0.0.0`. On the same Docker network, use `postgres` as the hostname in `DATABASE_URL` (port 5432), and `redis://valkey:6379` for `VALKEY_URL`. To keep the published port local to the Docker host, use `-p 127.0.0.1:3100:3100`.
 
 ## Tests
 
