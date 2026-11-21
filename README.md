@@ -17,7 +17,7 @@ A small TypeScript HTTP service that resolves short links. `GET /r/:slug` return
 
 ## Run locally
 
-Docker Compose runs the shortener, Postgres, and Valkey. Seed a link, then start the app.
+Docker Compose runs the shortener, Postgres, and Valkey. The app and npm service read their container settings from `.env.compose`. Seed a link, then start the app.
 
 ```sh
 docker compose run --build --rm app node scripts/seed.ts docs https://example.com/docs

@@ -3,11 +3,7 @@ name: url-shortener
 services:
   app:
     build: .
-    environment: &app-env
-      HOST: 0.0.0.0
-      PORT: "3100"
-      DATABASE_URL: postgresql://shortener:shortener@postgres:5432/shortener
-      VALKEY_URL: redis://valkey:6379
+    env_file: .env.compose
     ports:
       - "127.0.0.1:3100:3100"
     depends_on:
@@ -27,9 +23,7 @@ services:
       target: tools
     entrypoint: ["npm"]
     command: ["help"]
-    environment:
-      <<: *app-env
-      TEST_DATABASE_URL: postgresql://shortener:shortener@postgres:5432/shortener
+    env_file: .env.compose
     volumes:
       - .:/usr/src/app
       - node_modules:/usr/src/app/node_modules
