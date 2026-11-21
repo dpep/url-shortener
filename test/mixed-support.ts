@@ -7,13 +7,16 @@ import { connectCache } from '../src/adapters/valkey-cache.ts';
 import { createApp } from '../src/app.ts';
 import { createDatabasePool } from '../src/db/pool.ts';
 import { createLinkRepository } from '../src/repositories/links.ts';
+import { createLinkRoutes, linkMethods } from '../src/routes/link-routes.ts';
 import { createLinks } from '../src/services/links.ts';
 import { postgresFixture } from './postgres-fixture.ts';
 import { originalDestination } from './support.ts';
 
 export { newDestination, originalDestination } from './support.ts';
 
-const current = { createApp, createLinks, createDatabasePool, createLinkRepository, connectCache };
+const current = {
+  createApp, createLinks, createLinkRoutes, linkMethods, createDatabasePool, createLinkRepository, connectCache,
+};
 
 export async function fixture(t: TestContext, { baseline }: { baseline?: typeof current } = {}) {
   const { databaseUrl, cleanup } = await postgresFixture(t);
@@ -33,7 +36,11 @@ export async function fixture(t: TestContext, { baseline }: { baseline?: typeof 
     const cache = await version.connectCache(cachePrefix);
     cleanup.push(cache.close);
 
-    const app = version.createApp(version.createLinks({ repository, cache }));
+    const links = version.createLinks({ repository, cache });
+    const app = version.createApp({
+      routes: version.createLinkRoutes(links),
+      corsOptions: { methods: version.linkMethods },
+    });
     const listener = app.listen(0, '127.0.0.1');
     await once(listener, 'listening');
     cleanup.push(() => listener[Symbol.asyncDispose]());
