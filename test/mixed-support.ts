@@ -18,7 +18,7 @@ const current = {
   createApp, createLinks, createLinkRoutes, createDatabasePool, createLinkRepository, connectCache,
 };
 
-export async function fixture(t: TestContext, { baseline }: { baseline?: typeof current } = {}) {
+export async function fixture(t: TestContext, previous?: typeof current) {
   const { databaseUrl, cleanup } = await postgresFixture(t);
   const pool = createDatabasePool(databaseUrl);
   cleanup.push(() => pool.end());
@@ -48,8 +48,8 @@ export async function fixture(t: TestContext, { baseline }: { baseline?: typeof 
   }
 
   const app = await start(current);
-  const olderApp = baseline && await start(baseline);
-  return { ...app, baselineOrigin: olderApp?.origin, cache, database };
+  const previousApp = previous && await start(previous);
+  return { ...app, previousOrigin: previousApp?.origin, cache, database };
 }
 
 export async function redirect(origin: string, slug = 'docs') {

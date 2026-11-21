@@ -41,9 +41,9 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.event.pull_request.base.sha }}
-          path: .baseline
+          path: .previous
           persist-credentials: false
-      - run: npm ci --omit=dev --prefix .baseline
+      - run: npm ci --omit=dev --prefix .previous
         if: matrix.suite == 'mixed'
       - run: docker compose up -d --wait --wait-timeout 50
         if: matrix.suite == 'mixed'
@@ -51,7 +51,5 @@ jobs:
         if: matrix.suite == 'mixed'
       - run: npm run test:mixed
         if: matrix.suite == 'mixed'
-        env:
-          BASELINE_DIR: .baseline
       - if: always() && matrix.suite == 'mixed'
         run: docker compose down --volumes
