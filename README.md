@@ -17,9 +17,10 @@ A small TypeScript HTTP service that resolves short links. `GET /r/:slug` return
 
 ## Run locally
 
-Docker Compose runs the shortener, Postgres, and Valkey. The app and npm service read their container settings from `.env.compose`. Seed a link, then start the app.
+Docker Compose runs the shortener, Postgres, and Valkey. The app and npm service read their container settings from `.env`. Seed a link, then start the app.
 
 ```sh
+cp .env.example .env
 docker compose run --build --rm app run seed -- docs https://example.com/docs
 docker compose up -d --wait
 curl -i http://127.0.0.1:3100/r/docs
@@ -27,12 +28,14 @@ curl -i http://127.0.0.1:3100/r/docs
 
 The seed command preserves any existing entry for the slug. Postgres loads [the schema](db/schema.sql) when Compose initializes its data volume. Apply future schema changes to existing volumes with a migration. Run `docker compose restart app` after editing the app, and `docker compose down` when finished.
 
-To run the app on the host with Node.js 24.12 or later, start only Postgres and Valkey and copy the host settings.
+To run the app on the host with Node.js 24.12 or later, copy the example as above and use the published dependency ports.
 
 ```sh
 docker compose up -d --wait postgres valkey
 npm ci
-cp .env.example .env
+export DATABASE_URL=postgresql://shortener:shortener@127.0.0.1:5433/shortener
+export VALKEY_URL=redis://127.0.0.1:6380
+export HOST=127.0.0.1
 npm run seed -- docs https://example.com/docs
 npm start
 ```
