@@ -12,7 +12,7 @@ const repository = await openLinkRepository(databaseUrl);
 const cache = await connectCache();
 const app = createApp(createLinks({ repository, cache }));
 
-app.listen(port, host, error => {
+const listener = app.listen(port, host, error => {
   if (error) throw error;
-  console.info(`Redirect service listening on ${host}, port ${port}`);
+  console.info('Redirect service listening on', listener.address());
 });
