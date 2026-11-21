@@ -1,10 +1,10 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { createDatabasePool } from '../src/adapters/postgres-pool.ts';
-import { createLinkRepository } from '../src/repositories/links.ts';
-import { createLinks } from '../src/services/links.ts';
+import { createDatabasePool } from '../../src/adapters/postgres-pool.ts';
+import { createLinkRepository } from '../../src/repositories/links.ts';
+import { createLinks } from '../../src/services/links.ts';
 import { postgresFixture } from './postgres-fixture.ts';
-import { originalDestination, stubCache } from './support.ts';
+import { originalDestination, stubCache } from '../support.ts';
 
 test('a fresh schema has no matching link', async t => {
   const { databaseUrl, cleanup } = await postgresFixture(t);

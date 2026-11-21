@@ -18,7 +18,7 @@ export async function postgresFixture(t: TestContext) {
   await admin.query(`CREATE SCHEMA ${schema}`);
   cleanup.push(async () => { await admin.query(`DROP SCHEMA ${schema} CASCADE`); });
   await admin.query(`SET search_path TO ${schema}`);
-  await admin.query(await readFile(new URL('../db/schema.sql', import.meta.url), 'utf8'));
+  await admin.query(await readFile(new URL('../../db/schema.sql', import.meta.url), 'utf8'));
 
   const databaseUrl = new URL(baseUrl);
   databaseUrl.searchParams.set('options', `-c search_path=${schema}`);
