@@ -1,12 +1,12 @@
-FROM node:24-bookworm-slim AS base
+FROM node:24-bookworm-slim AS node
 
 WORKDIR /usr/src/app
 COPY package.json package-lock.json ./
 
-FROM base AS tools
+FROM node AS base
 RUN npm ci
 
-FROM base AS app
+FROM node AS app
 RUN npm ci --omit=dev
 COPY src ./src
 COPY scripts/seed.ts ./scripts/seed.ts
