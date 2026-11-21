@@ -6,14 +6,17 @@ import { fixture, newDestination, originalDestination, patch, redirect } from '.
 
 const baselineDir = process.env.BASELINE_DIR;
 assert.ok(baselineDir, 'Set BASELINE_DIR to a checkout of the base commit with npm ci run.');
-const baseline: typeof import('../src/server.ts') = await import(
-  pathToFileURL(resolve(baselineDir, 'src/server.ts')).href
-);
+const load = (path: string) => import(pathToFileURL(resolve(baselineDir, 'src', path)).href);
+const [app, links, postgres, valkey] = await Promise.all([
+  load('app.ts'),
+  load('services/links.ts'),
+  load('adapters/postgres-links.ts'),
+  load('adapters/valkey-cache.ts'),
+]);
+const baseline = { ...app, ...links, ...postgres, ...valkey };
 
 test('both versions serve the new destination after an acknowledged edit', async t => {
-  const { origin, baselineOrigin, database, cache } = await fixture(t, {
-    startBaseline: baseline.startApp,
-  });
+  const { origin, baselineOrigin, database, cache } = await fixture(t, { baseline });
   assert.ok(baselineOrigin);
 
   assert.equal(await redirect(baselineOrigin), originalDestination);
